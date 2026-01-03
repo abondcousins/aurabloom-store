@@ -1,11 +1,18 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc, asc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, users, 
+  products, InsertProduct, Product,
+  categories, InsertCategory, Category,
+  cartItems, InsertCartItem, CartItem,
+  orders, InsertOrder, Order,
+  orderItems, InsertOrderItem, OrderItem,
+  reviews, InsertReview, Review
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -17,6 +24,8 @@ export async function getDb() {
   }
   return _db;
 }
+
+// ============ USER HELPERS ============
 
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
@@ -89,4 +98,501 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============ CATEGORY HELPERS ============
+
+export async function getAllCategories() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(categories).orderBy(asc(categories.name));
+}
+
+export async function getCategoryBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+  return result[0] || null;
+}
+
+export async function createCategory(data: InsertCategory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(categories).values(data);
+}
+
+// ============ PRODUCT HELPERS ============
+
+export async function getAllProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).orderBy(desc(products.isFeatured), asc(products.name));
+}
+
+export async function getFeaturedProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).where(eq(products.isFeatured, true)).orderBy(asc(products.name));
+}
+
+export async function getProductsByCategory(categoryId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(asc(products.name));
+}
+
+export async function getProductBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
+  return result[0] || null;
+}
+
+export async function getProductById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function createProduct(data: InsertProduct) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(products).values(data);
+  return result;
+}
+
+export async function updateProductInventory(productId: number, quantity: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(products).set({ inventory: quantity }).where(eq(products.id, productId));
+}
+
+// ============ CART HELPERS ============
+
+export async function getCartItems(userId?: number, sessionId?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (userId) {
+    return db.select().from(cartItems).where(eq(cartItems.userId, userId));
+  } else if (sessionId) {
+    return db.select().from(cartItems).where(eq(cartItems.sessionId, sessionId));
+  }
+  return [];
+}
+
+export async function getCartWithProducts(userId?: number, sessionId?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const condition = userId 
+    ? eq(cartItems.userId, userId)
+    : sessionId 
+      ? eq(cartItems.sessionId, sessionId)
+      : sql`1=0`;
+  
+  const items = await db.select().from(cartItems).where(condition);
+  
+  const result = [];
+  for (const item of items) {
+    const product = await getProductById(item.productId);
+    if (product) {
+      result.push({ ...item, product });
+    }
+  }
+  return result;
+}
+
+export async function addToCart(data: InsertCartItem) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const condition = data.userId 
+    ? and(eq(cartItems.userId, data.userId), eq(cartItems.productId, data.productId))
+    : data.sessionId
+      ? and(eq(cartItems.sessionId, data.sessionId), eq(cartItems.productId, data.productId))
+      : sql`1=0`;
+  
+  const existing = await db.select().from(cartItems).where(condition).limit(1);
+  
+  if (existing.length > 0) {
+    await db.update(cartItems)
+      .set({ quantity: existing[0].quantity + (data.quantity || 1) })
+      .where(eq(cartItems.id, existing[0].id));
+  } else {
+    await db.insert(cartItems).values(data);
+  }
+}
+
+export async function updateCartItemQuantity(itemId: number, quantity: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (quantity <= 0) {
+    await db.delete(cartItems).where(eq(cartItems.id, itemId));
+  } else {
+    await db.update(cartItems).set({ quantity }).where(eq(cartItems.id, itemId));
+  }
+}
+
+export async function removeFromCart(itemId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(cartItems).where(eq(cartItems.id, itemId));
+}
+
+export async function clearCart(userId?: number, sessionId?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (userId) {
+    await db.delete(cartItems).where(eq(cartItems.userId, userId));
+  } else if (sessionId) {
+    await db.delete(cartItems).where(eq(cartItems.sessionId, sessionId));
+  }
+}
+
+export async function mergeCartOnLogin(sessionId: string, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  const sessionItems = await db.select().from(cartItems).where(eq(cartItems.sessionId, sessionId));
+  
+  for (const item of sessionItems) {
+    const existing = await db.select().from(cartItems)
+      .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, item.productId)))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      await db.update(cartItems)
+        .set({ quantity: existing[0].quantity + item.quantity })
+        .where(eq(cartItems.id, existing[0].id));
+      await db.delete(cartItems).where(eq(cartItems.id, item.id));
+    } else {
+      await db.update(cartItems)
+        .set({ userId, sessionId: null })
+        .where(eq(cartItems.id, item.id));
+    }
+  }
+}
+
+// ============ ORDER HELPERS ============
+
+function generateOrderNumber(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `AB-${timestamp}-${random}`;
+}
+
+export async function createOrder(data: Omit<InsertOrder, 'orderNumber'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const orderNumber = generateOrderNumber();
+  const result = await db.insert(orders).values({ ...data, orderNumber });
+  
+  const insertId = result[0].insertId;
+  const order = await db.select().from(orders).where(eq(orders.id, insertId)).limit(1);
+  return order[0];
+}
+
+export async function createOrderItems(items: InsertOrderItem[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(orderItems).values(items);
+}
+
+export async function getOrderById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function getOrderByNumber(orderNumber: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
+  return result[0] || null;
+}
+
+export async function getOrderItems(orderId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+}
+
+export async function getAllOrders() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(orders).orderBy(desc(orders.createdAt));
+}
+
+export async function getUserOrders(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+}
+
+export async function updateOrderStatus(orderId: number, status: Order['status']) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(orders).set({ status }).where(eq(orders.id, orderId));
+}
+
+// ============ REVIEW HELPERS ============
+
+export async function getProductReviews(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(reviews).where(eq(reviews.productId, productId)).orderBy(desc(reviews.createdAt));
+}
+
+export async function createReview(data: InsertReview) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(reviews).values(data);
+  
+  const allReviews = await getProductReviews(data.productId);
+  const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+  await db.update(products)
+    .set({ rating: avgRating.toFixed(1), reviewCount: allReviews.length })
+    .where(eq(products.id, data.productId));
+}
+
+// ============ SEED DATA ============
+
+export async function seedInitialData() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot seed: database not available");
+    return;
+  }
+
+  const existingCategories = await getAllCategories();
+  if (existingCategories.length > 0) {
+    console.log("[Database] Data already seeded, skipping...");
+    return;
+  }
+
+  console.log("[Database] Seeding initial data...");
+
+  const categoryData: InsertCategory[] = [
+    { name: "Skin Care", slug: "skin-care", description: "Rejuvenate and nourish your skin with our curated collection" },
+    { name: "Home Wellness", slug: "home-wellness", description: "Transform your space into a sanctuary of calm" },
+    { name: "Beauty", slug: "beauty", description: "Enhance your natural beauty with viral favorites" },
+  ];
+
+  for (const cat of categoryData) {
+    await db.insert(categories).values(cat);
+  }
+
+  const cats = await getAllCategories();
+  const skinCareId = cats.find(c => c.slug === "skin-care")?.id || 1;
+  const homeWellnessId = cats.find(c => c.slug === "home-wellness")?.id || 2;
+  const beautyId = cats.find(c => c.slug === "beauty")?.id || 3;
+
+  const productData: InsertProduct[] = [
+    {
+      name: "LED Photon Therapy Mask",
+      slug: "led-photon-therapy-mask",
+      description: "Experience professional-grade skin rejuvenation at home with our 7-color LED therapy mask. This viral sensation uses red light therapy to boost collagen production, reduce fine lines, and give you that coveted glass skin glow. Touch-screen controls make it effortless to customize your treatment.",
+      benefits: [
+        "Stimulates collagen production for firmer skin",
+        "Reduces appearance of fine lines and wrinkles",
+        "Improves skin texture and tone",
+        "Helps reduce acne and inflammation",
+        "Professional spa results at home"
+      ],
+      specifications: {
+        "Colors": "7 LED light modes",
+        "Material": "Medical-grade silicone",
+        "Power": "USB rechargeable",
+        "Treatment Time": "15-20 minutes",
+        "Warranty": "1 year"
+      },
+      price: "99.00",
+      compareAtPrice: "149.00",
+      costPrice: "27.56",
+      shippingCost: "0.00",
+      imageUrl: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80",
+        "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=800&q=80"
+      ],
+      categoryId: skinCareId,
+      inventory: 150,
+      shippingDaysMin: 8,
+      shippingDaysMax: 20,
+      isFeatured: true,
+      isHero: false,
+      rating: "4.8",
+      reviewCount: 127
+    },
+    {
+      name: "Collagen Overnight Wrapping Mask",
+      slug: "collagen-overnight-mask",
+      description: "Wake up to transformed skin with our viral K-beauty collagen mask. This overnight treatment deeply hydrates while you sleep, creating that coveted 'morning shed' effect that took TikTok by storm. Infused with natural collagen and hydrating ingredients for plump, dewy skin.",
+      benefits: [
+        "Deep overnight hydration",
+        "Firms and plumps skin",
+        "Creates the viral 'morning shed' effect",
+        "Reduces appearance of pores",
+        "Suitable for all skin types"
+      ],
+      specifications: {
+        "Size": "75ml",
+        "Key Ingredients": "Collagen, Hyaluronic Acid",
+        "Skin Type": "All skin types",
+        "Usage": "2-3 times per week",
+        "Cruelty Free": "Yes"
+      },
+      price: "34.00",
+      compareAtPrice: "45.00",
+      costPrice: "10.84",
+      shippingCost: "0.00",
+      imageUrl: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&q=80",
+        "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&q=80"
+      ],
+      categoryId: skinCareId,
+      inventory: 200,
+      shippingDaysMin: 8,
+      shippingDaysMax: 20,
+      isFeatured: true,
+      isHero: false,
+      rating: "4.7",
+      reviewCount: 89
+    },
+    {
+      name: "Peel-Off Lip Stain Trio",
+      slug: "peel-off-lip-stain",
+      description: "Get the perfect pout that lasts all day with our viral peel-off lip stain set. This innovative formula creates a transfer-proof, kiss-proof tint that survives coffee, meals, and everything in between. Includes three stunning shades for every mood.",
+      benefits: [
+        "Transfer-proof color that lasts 12+ hours",
+        "Hydrating formula won't dry lips",
+        "Satisfying peel-off application",
+        "Three versatile shades included",
+        "No need for touch-ups"
+      ],
+      specifications: {
+        "Set Includes": "3 lip stains (3ml each)",
+        "Shades": "Red Brown, Nude Brown, Cocoa",
+        "Finish": "Natural matte",
+        "Longevity": "12+ hours",
+        "Vegan": "Yes"
+      },
+      price: "29.00",
+      compareAtPrice: "39.00",
+      costPrice: "12.18",
+      shippingCost: "0.00",
+      imageUrl: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&q=80",
+        "https://images.unsplash.com/photo-1631214540553-ff044a3ff1ea?w=800&q=80"
+      ],
+      categoryId: beautyId,
+      inventory: 300,
+      shippingDaysMin: 10,
+      shippingDaysMax: 25,
+      isFeatured: true,
+      isHero: false,
+      rating: "4.6",
+      reviewCount: 156
+    },
+    {
+      name: "Flame Effect Aromatherapy Diffuser",
+      slug: "flame-aromatherapy-diffuser",
+      description: "Transform your space into a sanctuary with our mesmerizing flame-effect diffuser. This 2-in-1 humidifier and aromatherapy machine creates a stunning visual display while filling your room with calming essential oil mist. Bluetooth remote control for ultimate convenience.",
+      benefits: [
+        "Realistic flame effect creates ambient lighting",
+        "Humidifies and purifies air",
+        "Bluetooth remote control included",
+        "Whisper-quiet operation",
+        "Auto shut-off safety feature"
+      ],
+      specifications: {
+        "Capacity": "150ml",
+        "Material": "Premium wood grain finish",
+        "Control": "Bluetooth + Touch",
+        "Coverage": "Up to 300 sq ft",
+        "Run Time": "4-6 hours"
+      },
+      price: "69.00",
+      compareAtPrice: "89.00",
+      costPrice: "24.28",
+      shippingCost: "0.00",
+      imageUrl: "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=800&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=800&q=80",
+        "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80"
+      ],
+      categoryId: homeWellnessId,
+      inventory: 175,
+      shippingDaysMin: 6,
+      shippingDaysMax: 13,
+      isFeatured: true,
+      isHero: true,
+      rating: "4.9",
+      reviewCount: 203
+    },
+    {
+      name: "Hair Growth Serum Spray",
+      slug: "hair-growth-spray",
+      description: "Unlock your hair's full potential with our bestselling growth serum. This lightweight spray formula stimulates follicles and promotes thicker, healthier hair growth. Infused with rosemary and biotin for visible results in just weeks.",
+      benefits: [
+        "Stimulates hair follicles for new growth",
+        "Strengthens existing hair",
+        "Reduces hair fall and breakage",
+        "Lightweight, non-greasy formula",
+        "Pleasant herbal scent"
+      ],
+      specifications: {
+        "Size": "30ml",
+        "Key Ingredients": "Rosemary, Biotin, Castor Oil",
+        "Hair Type": "All hair types",
+        "Usage": "Apply daily to scalp",
+        "Results": "Visible in 4-6 weeks"
+      },
+      price: "24.00",
+      compareAtPrice: "35.00",
+      costPrice: "8.79",
+      shippingCost: "0.00",
+      imageUrl: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&q=80",
+        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80"
+      ],
+      categoryId: beautyId,
+      inventory: 250,
+      shippingDaysMin: 8,
+      shippingDaysMax: 20,
+      isFeatured: true,
+      isHero: false,
+      rating: "4.5",
+      reviewCount: 94
+    }
+  ];
+
+  for (const product of productData) {
+    await db.insert(products).values(product);
+  }
+
+  const seededProducts = await getAllProducts();
+  
+  const reviewData: InsertReview[] = [
+    { productId: seededProducts[0]?.id || 1, authorName: "Sarah M.", rating: 5, title: "Game changer!", content: "I've been using this for 3 weeks and my skin has never looked better. The red light really works!", isVerified: true },
+    { productId: seededProducts[0]?.id || 1, authorName: "Jessica L.", rating: 5, title: "Worth every penny", content: "Skeptical at first but the results speak for themselves. My fine lines are visibly reduced.", isVerified: true },
+    { productId: seededProducts[1]?.id || 2, authorName: "Emily R.", rating: 5, title: "TikTok made me buy it", content: "The morning peel is SO satisfying and my skin is glowing!", isVerified: true },
+    { productId: seededProducts[2]?.id || 3, authorName: "Amanda K.", rating: 4, title: "Finally, a lip stain that lasts", content: "Survived my entire wedding day. The nude brown is my new go-to.", isVerified: true },
+    { productId: seededProducts[3]?.id || 4, authorName: "Michelle T.", rating: 5, title: "Obsessed with the flame effect", content: "This is the aesthetic piece my bedroom was missing. So calming!", isVerified: true },
+    { productId: seededProducts[3]?.id || 4, authorName: "Rachel B.", rating: 5, title: "Fast shipping!", content: "Arrived in just 8 days and works perfectly. The flame looks so real.", isVerified: true },
+    { productId: seededProducts[4]?.id || 5, authorName: "Taylor S.", rating: 4, title: "Seeing baby hairs!", content: "After 6 weeks I'm finally seeing new growth around my hairline. Will keep using!", isVerified: true },
+  ];
+
+  for (const review of reviewData) {
+    await db.insert(reviews).values(review);
+  }
+
+  console.log("[Database] Seed complete!");
+}
