@@ -33,3 +33,6 @@
 
 ## Image Updates
 - [x] Replace placeholder images with real CJ Dropshipping product photos
+
+## Product Changes
+- [x] Remove Hair Growth Serum Spray from catalog

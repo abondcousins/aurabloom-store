@@ -539,43 +539,6 @@ export async function seedInitialData() {
       isHero: true,
       rating: "4.9",
       reviewCount: 203
-    },
-    {
-      name: "Hair Growth Serum Spray",
-      slug: "hair-growth-spray",
-      description: "Unlock your hair's full potential with our bestselling growth serum. This lightweight spray formula stimulates follicles and promotes thicker, healthier hair growth. Infused with rosemary and biotin for visible results in just weeks.",
-      benefits: [
-        "Stimulates hair follicles for new growth",
-        "Strengthens existing hair",
-        "Reduces hair fall and breakage",
-        "Lightweight, non-greasy formula",
-        "Pleasant herbal scent"
-      ],
-      specifications: {
-        "Size": "30ml",
-        "Key Ingredients": "Rosemary, Biotin, Castor Oil",
-        "Hair Type": "All hair types",
-        "Usage": "Apply daily to scalp",
-        "Results": "Visible in 4-6 weeks"
-      },
-      price: "24.00",
-      compareAtPrice: "35.00",
-      costPrice: "8.79",
-      shippingCost: "0.00",
-      imageUrl: "/products/hair-growth-1.jpg",
-      images: [
-        "/products/hair-growth-1.jpg",
-        "/products/hair-growth-2.jpg",
-        "/products/hair-growth-3.jpg"
-      ],
-      categoryId: beautyId,
-      inventory: 250,
-      shippingDaysMin: 8,
-      shippingDaysMax: 20,
-      isFeatured: true,
-      isHero: false,
-      rating: "4.5",
-      reviewCount: 94
     }
   ];
 
@@ -592,7 +555,6 @@ export async function seedInitialData() {
     { productId: seededProducts[2]?.id || 3, authorName: "Amanda K.", rating: 4, title: "Finally, a lip stain that lasts", content: "Survived my entire wedding day. The nude brown is my new go-to.", isVerified: true },
     { productId: seededProducts[3]?.id || 4, authorName: "Michelle T.", rating: 5, title: "Obsessed with the flame effect", content: "This is the aesthetic piece my bedroom was missing. So calming!", isVerified: true },
     { productId: seededProducts[3]?.id || 4, authorName: "Rachel B.", rating: 5, title: "Fast shipping!", content: "Arrived in just 8 days and works perfectly. The flame looks so real.", isVerified: true },
-    { productId: seededProducts[4]?.id || 5, authorName: "Taylor S.", rating: 4, title: "Seeing baby hairs!", content: "After 6 weeks I'm finally seeing new growth around my hairline. Will keep using!", isVerified: true },
   ];
 
   for (const review of reviewData) {

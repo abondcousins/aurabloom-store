@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM reviews WHERE productId = (SELECT id FROM products WHERE slug = 'hair-growth-spray'); DELETE FROM cartItems WHERE productId = (SELECT id FROM products WHERE slug = 'hair-growth-spray'); DELETE FROM products WHERE slug = 'hair-growth-spray';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3YUra4TMGWTz4H7.root --database kHXtmiufTKxix479Qs3Z3j --execute DELETE FROM reviews WHERE productId = (SELECT id FROM products WHERE slug = 'hair-growth-spray'); DELETE FROM cartItems WHERE productId = (SELECT id FROM products WHERE slug = 'hair-growth-spray'); DELETE FROM products WHERE slug = 'hair-growth-spray';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 549
+}
