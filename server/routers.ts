@@ -8,6 +8,7 @@ import { notifyOwner } from "./_core/notification";
 import * as db from "./db";
 import { stripe, isStripeConfigured } from "./stripe/client";
 import { productToLineItem } from "./stripe/products";
+import { cjRouter } from "./cj/routes";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -409,6 +410,9 @@ export const appRouter = router({
         }
       }),
   }),
+
+  // CJ Dropshipping integration
+  cj: cjRouter,
 });
 
 export type AppRouter = typeof appRouter;

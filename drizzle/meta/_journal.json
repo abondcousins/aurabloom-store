@@ -15,6 +15,13 @@
       "when": 1767482967904,
       "tag": "0001_curious_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767543674656,
+      "tag": "0002_bouncy_turbo",
+      "breakpoints": true
     }
   ]
 }

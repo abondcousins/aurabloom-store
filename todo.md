@@ -55,3 +55,11 @@
 
 ## Bug Fixes
 - [x] Fix product reviews not matched to correct products
+
+
+## CJ Dropshipping Integration
+- [x] Store CJ API key securely as environment variable
+- [x] Create CJ Dropshipping API client
+- [x] Build order sync service to create CJ orders
+- [x] Update checkout flow to automatically sync orders to CJ
+- [x] Add tracking number sync from CJ to store orders

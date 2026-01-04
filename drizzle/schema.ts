@@ -118,6 +118,13 @@ export const orders = mysqlTable("orders", {
   shippingTotal: decimal("shippingTotal", { precision: 10, scale: 2 }).notNull(),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   notes: text("notes"),
+  // CJ Dropshipping integration fields
+  cjOrderId: varchar("cjOrderId", { length: 64 }),
+  cjSyncStatus: mysqlEnum("cjSyncStatus", ["pending", "synced", "failed"]).default("pending"),
+  cjSyncedAt: timestamp("cjSyncedAt"),
+  cjSyncError: text("cjSyncError"),
+  trackingNumber: varchar("trackingNumber", { length: 100 }),
+  trackingUrl: text("trackingUrl"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

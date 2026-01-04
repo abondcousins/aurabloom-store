@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { stripe } from './client';
 import { notifyOwner } from '../_core/notification';
 import * as db from '../db';
+import { createCJOrder } from '../cj/orderSync';
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   if (!stripe) {
@@ -142,4 +143,56 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   console.log(`[Webhook] Order created: ${order.orderNumber}`);
+
+  // Sync order to CJ Dropshipping
+  try {
+    // Get product slugs for CJ mapping
+    const productsWithSlugs = await Promise.all(
+      cartItems.map(async (item) => {
+        const product = await db.getProductById(item.productId);
+        return {
+          productId: item.productId,
+          productSlug: product?.slug || '',
+          quantity: item.quantity,
+          price: parseFloat(item.price),
+        };
+      })
+    );
+
+    const cjResult = await createCJOrder(
+      order.orderNumber,
+      productsWithSlugs,
+      {
+        fullName: customerDetails?.name || metadata.customer_name || '',
+        email: customerDetails?.email || metadata.customer_email || '',
+        phone: customerDetails?.phone || '',
+        address: shippingDetails?.address?.line1 || metadata.shipping_address || '',
+        city: shippingDetails?.address?.city || metadata.shipping_city || '',
+        state: shippingDetails?.address?.state || metadata.shipping_state || '',
+        zipCode: shippingDetails?.address?.postal_code || metadata.shipping_zip || '',
+        country: shippingDetails?.address?.country || metadata.shipping_country || 'United States',
+        countryCode: shippingDetails?.address?.country || 'US',
+      }
+    );
+
+    if (cjResult.success) {
+      console.log(`[Webhook] Order synced to CJ Dropshipping: ${cjResult.cjOrderId}`);
+      await notifyOwner({
+        title: `📦 CJ Order Synced: ${order.orderNumber}`,
+        content: `Order ${order.orderNumber} has been automatically synced to CJ Dropshipping.\n\nCJ Order ID: ${cjResult.cjOrderId}\n\nThe order will be processed and shipped by CJ Dropshipping.`,
+      });
+    } else {
+      console.error(`[Webhook] Failed to sync to CJ: ${cjResult.error}`);
+      await notifyOwner({
+        title: `⚠️ CJ Sync Failed: ${order.orderNumber}`,
+        content: `Order ${order.orderNumber} could not be automatically synced to CJ Dropshipping.\n\nError: ${cjResult.error}\n\nPlease manually create this order in CJ Dropshipping.`,
+      });
+    }
+  } catch (cjError) {
+    console.error('[Webhook] CJ sync error:', cjError);
+    await notifyOwner({
+      title: `⚠️ CJ Sync Error: ${order.orderNumber}`,
+      content: `An error occurred while syncing order ${order.orderNumber} to CJ Dropshipping.\n\nPlease manually create this order in CJ Dropshipping.`,
+    });
+  }
 }
