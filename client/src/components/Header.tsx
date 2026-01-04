@@ -36,7 +36,7 @@ export function Header() {
           <img 
             src="/logo.png" 
             alt="AuraBloom" 
-            className="h-8 md:h-10 w-auto"
+            className="h-10 md:h-14 w-auto"
           />
         </Link>
 
@@ -122,7 +122,7 @@ export function Header() {
                 <img 
                   src="/logo.png" 
                   alt="AuraBloom" 
-                  className="h-8 w-auto"
+                  className="h-10 w-auto"
                 />
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (

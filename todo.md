@@ -41,3 +41,4 @@
 - [x] Design minimalist AuraBloom logo with blooming flower icon
 - [x] Integrate logo into website header
 - [x] Add logo as favicon
+- [x] Make logo larger in header, footer, and mobile menu

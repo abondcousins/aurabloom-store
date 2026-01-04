@@ -12,7 +12,7 @@ export function Footer() {
               <img 
                 src="/logo.png" 
                 alt="AuraBloom" 
-                className="h-8 w-auto"
+                className="h-10 w-auto"
               />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
