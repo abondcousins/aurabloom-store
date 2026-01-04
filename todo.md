@@ -42,3 +42,6 @@
 - [x] Integrate logo into website header
 - [x] Add logo as favicon
 - [x] Make logo larger in header, footer, and mobile menu
+
+## Pages
+- [x] Create About Us page with brand story
