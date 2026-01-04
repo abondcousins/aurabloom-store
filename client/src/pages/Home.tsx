@@ -39,7 +39,7 @@ export default function Home() {
                 </div>
                 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
-                  Curated Viral Self-Care.{' '}
+                  Curated Self-Care.{' '}
                   <span className="text-primary">Real Results, Real Fast.</span>
                 </h1>
                 
