@@ -144,10 +144,35 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   console.log(`[Webhook] Order created: ${order.orderNumber}`);
 
-  // Send customer order confirmation notification
-  // Note: This uses the owner notification system. For production, integrate with
-  // an email service like SendGrid, Resend, or Mailchimp for customer emails.
-  console.log(`[Webhook] Order confirmation would be sent to: ${customerDetails?.email || metadata.customer_email}`);
+  // Send enhanced order confirmation notification to owner
+  // This includes all details needed for customer communication
+  const customerEmail = customerDetails?.email || metadata.customer_email;
+  const customerName = customerDetails?.name || metadata.customer_name;
+  const shippingAddress = [
+    shippingDetails?.address?.line1 || metadata.shipping_address,
+    shippingDetails?.address?.line2,
+    shippingDetails?.address?.city || metadata.shipping_city,
+    shippingDetails?.address?.state || metadata.shipping_state,
+    shippingDetails?.address?.postal_code || metadata.shipping_zip,
+    shippingDetails?.address?.country || metadata.shipping_country,
+  ].filter(Boolean).join(', ');
+
+  // Send detailed order confirmation notification
+  await notifyOwner({
+    title: `📧 Order Confirmation Ready: ${order.orderNumber}`,
+    content: `**Order Confirmation Details**\n\n` +
+      `**Customer:** ${customerName}\n` +
+      `**Email:** ${customerEmail}\n` +
+      `**Order Number:** ${order.orderNumber}\n\n` +
+      `**Items Ordered:**\n${cartItems.map(item => `• ${item.quantity}x ${item.name} - $${(parseFloat(item.price) * item.quantity).toFixed(2)}`).join('\n')}\n\n` +
+      `**Order Total:** $${total.toFixed(2)}\n\n` +
+      `**Shipping Address:**\n${shippingAddress}\n\n` +
+      `**Estimated Delivery:** 6-20 business days\n\n` +
+      `---\n` +
+      `You can send a confirmation email to the customer at: ${customerEmail}`,
+  });
+
+  console.log(`[Webhook] Order confirmation notification sent for: ${customerEmail}`);
 
   // Sync order to CJ Dropshipping
   try {
