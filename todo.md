@@ -50,3 +50,4 @@
 - [x] Integrate Stripe payment gateway
 - [x] Enable real-time credit card transactions at checkout
 - [x] Create FAQ page with common questions
+- [x] Create Shipping Info page with delivery estimates and tracking instructions
