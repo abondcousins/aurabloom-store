@@ -51,3 +51,4 @@
 - [x] Enable real-time credit card transactions at checkout
 - [x] Create FAQ page with common questions
 - [x] Create Shipping Info page with delivery estimates and tracking instructions
+- [x] Add social media links (Facebook, Instagram, TikTok) to footer
