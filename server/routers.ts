@@ -411,6 +411,39 @@ export const appRouter = router({
       }),
   }),
 
+  // Contact form
+  contact: router({
+    submit: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        subject: z.string().min(1),
+        orderNumber: z.string().optional(),
+        message: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        // Notify the store owner about the contact inquiry
+        const subjectLabels: Record<string, string> = {
+          general: 'General Inquiry',
+          order: 'Order Status',
+          shipping: 'Shipping Question',
+          return: 'Return/Refund Request',
+          product: 'Product Question',
+          other: 'Other',
+        };
+        
+        const subjectLabel = subjectLabels[input.subject] || input.subject;
+        const orderInfo = input.orderNumber ? `\nOrder Number: ${input.orderNumber}` : '';
+        
+        await notifyOwner({
+          title: `New Contact: ${subjectLabel}`,
+          content: `From: ${input.name} (${input.email})${orderInfo}\n\nMessage:\n${input.message}`,
+        });
+        
+        return { success: true };
+      }),
+  }),
+
   // CJ Dropshipping integration
   cj: cjRouter,
 });

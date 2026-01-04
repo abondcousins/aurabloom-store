@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE products SET cjVariantId = 'CJPF205440201AZ' WHERE slug = 'led-photon-therapy-mask';\nUPDATE products SET cjVariantId = 'CJMJ209113201AZ' WHERE slug = 'collagen-overnight-wrapping-mask';\nUPDATE products SET cjVariantId = 'CJMJ216764604DW' WHERE slug = 'peel-off-lip-stain-trio';\nUPDATE products SET cjVariantId = 'CJJT244060001AZ' WHERE slug = 'flame-effect-aromatherapy-diffuser';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3YUra4TMGWTz4H7.root --database kHXtmiufTKxix479Qs3Z3j --execute UPDATE products SET cjVariantId = 'CJPF205440201AZ' WHERE slug = 'led-photon-therapy-mask';\nUPDATE products SET cjVariantId = 'CJMJ209113201AZ' WHERE slug = 'collagen-overnight-wrapping-mask';\nUPDATE products SET cjVariantId = 'CJMJ216764604DW' WHERE slug = 'peel-off-lip-stain-trio';\nUPDATE products SET cjVariantId = 'CJJT244060001AZ' WHERE slug = 'flame-effect-aromatherapy-diffuser';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 571
+}

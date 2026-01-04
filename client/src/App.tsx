@@ -18,6 +18,7 @@ import FAQ from "./pages/FAQ";
 import Shipping from "./pages/Shipping";
 import AdminCJMapping from "./pages/AdminCJMapping";
 import Dashboard from "./pages/Dashboard";
+import Contact from "./pages/Contact";
 
 function Router() {
   return (
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/faq" component={FAQ} />
       <Route path="/shipping" component={Shipping} />
+      <Route path="/contact" component={Contact} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

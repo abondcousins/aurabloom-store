@@ -56,6 +56,8 @@ export const products = mysqlTable("products", {
   isHero: boolean("isHero").default(false),
   rating: decimal("rating", { precision: 2, scale: 1 }).default("4.5"),
   reviewCount: int("reviewCount").default(0),
+  cjVariantId: varchar("cjVariantId", { length: 64 }),
+  cjProductId: varchar("cjProductId", { length: 64 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

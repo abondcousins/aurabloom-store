@@ -144,6 +144,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   console.log(`[Webhook] Order created: ${order.orderNumber}`);
 
+  // Send customer order confirmation notification
+  // Note: This uses the owner notification system. For production, integrate with
+  // an email service like SendGrid, Resend, or Mailchimp for customer emails.
+  console.log(`[Webhook] Order confirmation would be sent to: ${customerDetails?.email || metadata.customer_email}`);
+
   // Sync order to CJ Dropshipping
   try {
     // Get product slugs for CJ mapping

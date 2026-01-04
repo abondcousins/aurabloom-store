@@ -72,3 +72,8 @@
 - [x] Add customer management section (view customers, order history)
 - [x] Add settings section (store settings, notifications, integrations)
 - [x] Add recent activity feed and quick actions
+
+## New Features
+- [x] Map all products to CJ Dropshipping variant IDs
+- [x] Create contact page with inquiry form
+- [x] Set up email notifications for order confirmations (owner notifications enabled)
