@@ -1,0 +1,52 @@
+{
+  "query": "SELECT r.id, r.productId, r.authorName, r.title, p.name as productName FROM reviews r LEFT JOIN products p ON r.productId = p.id ORDER BY r.id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3YUra4TMGWTz4H7.root --database kHXtmiufTKxix479Qs3Z3j --execute SELECT r.id, r.productId, r.authorName, r.title, p.name as productName FROM reviews r LEFT JOIN products p ON r.productId = p.id ORDER BY r.id;",
+  "rows": [
+    {
+      "id": "30001",
+      "productId": "30002",
+      "authorName": "Sarah M.",
+      "title": "Game changer!",
+      "productName": "Collagen Overnight Wrapping Mask"
+    },
+    {
+      "id": "30002",
+      "productId": "30002",
+      "authorName": "Jessica L.",
+      "title": "Worth every penny",
+      "productName": "Collagen Overnight Wrapping Mask"
+    },
+    {
+      "id": "30003",
+      "productId": "30004",
+      "authorName": "Emily R.",
+      "title": "TikTok made me buy it",
+      "productName": "Flame Effect Aromatherapy Diffuser"
+    },
+    {
+      "id": "30005",
+      "productId": "30001",
+      "authorName": "Michelle T.",
+      "title": "Obsessed with the flame effect",
+      "productName": "LED Photon Therapy Mask"
+    },
+    {
+      "id": "30006",
+      "productId": "30001",
+      "authorName": "Rachel B.",
+      "title": "Fast shipping!",
+      "productName": "LED Photon Therapy Mask"
+    },
+    {
+      "id": "30007",
+      "productId": "30003",
+      "authorName": "Taylor S.",
+      "title": "Seeing baby hairs!",
+      "productName": "Peel-Off Lip Stain Trio"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tproductId\tauthorName\ttitle\tproductName\n30001\t30002\tSarah M.\tGame changer!\tCollagen Overnight Wrapping Mask\n30002\t30002\tJessica L.\tWorth every penny\tCollagen Overnight Wrapping Mask\n30003\t30004\tEmily R.\tTikTok made me buy it\tFlame Effect Aromatherapy Diffuser\n30005\t30001\tMichelle T.\tObsessed with the flame effect\tLED Photon Therapy Mask\n30006\t30001\tRachel B.\tFast shipping!\tLED Photon Therapy Mask\n30007\t30003\tTaylor S.\tSeeing baby hairs!\tPeel-Off Lip Stain Trio\n",
+  "stderr": "",
+  "execution_time_ms": 396
+}

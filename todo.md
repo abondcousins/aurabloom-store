@@ -52,3 +52,6 @@
 - [x] Create FAQ page with common questions
 - [x] Create Shipping Info page with delivery estimates and tracking instructions
 - [x] Add social media links (Facebook, Instagram, TikTok) to footer
+
+## Bug Fixes
+- [x] Fix product reviews not matched to correct products

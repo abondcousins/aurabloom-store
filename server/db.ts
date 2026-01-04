@@ -546,15 +546,25 @@ export async function seedInitialData() {
     await db.insert(products).values(product);
   }
 
-  const seededProducts = await getAllProducts();
+  // Get products by slug to ensure correct review mapping
+  const ledMask = await getProductBySlug('led-photon-therapy-mask');
+  const collagenMask = await getProductBySlug('collagen-overnight-mask');
+  const lipStain = await getProductBySlug('peel-off-lip-stain');
+  const diffuser = await getProductBySlug('flame-aromatherapy-diffuser');
   
   const reviewData: InsertReview[] = [
-    { productId: seededProducts[0]?.id || 1, authorName: "Sarah M.", rating: 5, title: "Game changer!", content: "I've been using this for 3 weeks and my skin has never looked better. The red light really works!", isVerified: true },
-    { productId: seededProducts[0]?.id || 1, authorName: "Jessica L.", rating: 5, title: "Worth every penny", content: "Skeptical at first but the results speak for themselves. My fine lines are visibly reduced.", isVerified: true },
-    { productId: seededProducts[1]?.id || 2, authorName: "Emily R.", rating: 5, title: "TikTok made me buy it", content: "The morning peel is SO satisfying and my skin is glowing!", isVerified: true },
-    { productId: seededProducts[2]?.id || 3, authorName: "Amanda K.", rating: 4, title: "Finally, a lip stain that lasts", content: "Survived my entire wedding day. The nude brown is my new go-to.", isVerified: true },
-    { productId: seededProducts[3]?.id || 4, authorName: "Michelle T.", rating: 5, title: "Obsessed with the flame effect", content: "This is the aesthetic piece my bedroom was missing. So calming!", isVerified: true },
-    { productId: seededProducts[3]?.id || 4, authorName: "Rachel B.", rating: 5, title: "Fast shipping!", content: "Arrived in just 8 days and works perfectly. The flame looks so real.", isVerified: true },
+    // LED Photon Therapy Mask reviews
+    { productId: ledMask?.id || 1, authorName: "Sarah M.", rating: 5, title: "Game changer!", content: "I've been using this for 3 weeks and my skin has never looked better. The red light really works!", isVerified: true },
+    { productId: ledMask?.id || 1, authorName: "Jessica L.", rating: 5, title: "Worth every penny", content: "Skeptical at first but the results speak for themselves. My fine lines are visibly reduced.", isVerified: true },
+    // Collagen Overnight Wrapping Mask reviews
+    { productId: collagenMask?.id || 2, authorName: "Emily R.", rating: 5, title: "TikTok made me buy it", content: "The morning peel is SO satisfying and my skin is glowing!", isVerified: true },
+    { productId: collagenMask?.id || 2, authorName: "Megan H.", rating: 5, title: "Best overnight mask ever", content: "Wake up with the softest skin. The collagen really makes a difference!", isVerified: true },
+    // Peel-Off Lip Stain Trio reviews
+    { productId: lipStain?.id || 3, authorName: "Amanda K.", rating: 4, title: "Finally, a lip stain that lasts", content: "Survived my entire wedding day. The nude brown is my new go-to.", isVerified: true },
+    { productId: lipStain?.id || 3, authorName: "Taylor S.", rating: 5, title: "Love all three colors", content: "The peel-off is so satisfying and the colors are gorgeous. Perfect for everyday!", isVerified: true },
+    // Flame Effect Aromatherapy Diffuser reviews
+    { productId: diffuser?.id || 4, authorName: "Michelle T.", rating: 5, title: "Obsessed with the flame effect", content: "This is the aesthetic piece my bedroom was missing. So calming!", isVerified: true },
+    { productId: diffuser?.id || 4, authorName: "Rachel B.", rating: 5, title: "Fast shipping!", content: "Arrived in just 8 days and works perfectly. The flame looks so real.", isVerified: true },
   ];
 
   for (const review of reviewData) {
