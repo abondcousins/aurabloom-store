@@ -414,10 +414,11 @@ export async function seedInitialData() {
       compareAtPrice: "149.00",
       costPrice: "27.56",
       shippingCost: "0.00",
-      imageUrl: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80",
+      imageUrl: "/products/led-mask-1.jpg",
       images: [
-        "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80",
-        "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=800&q=80"
+        "/products/led-mask-1.jpg",
+        "/products/led-mask-2.jpg",
+        "/products/led-mask-3.jpg"
       ],
       categoryId: skinCareId,
       inventory: 150,
@@ -450,10 +451,11 @@ export async function seedInitialData() {
       compareAtPrice: "45.00",
       costPrice: "10.84",
       shippingCost: "0.00",
-      imageUrl: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&q=80",
+      imageUrl: "/products/collagen-mask-1.png",
       images: [
-        "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&q=80",
-        "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&q=80"
+        "/products/collagen-mask-1.png",
+        "/products/collagen-mask-2.jpg",
+        "/products/collagen-mask-3.jpg"
       ],
       categoryId: skinCareId,
       inventory: 200,
@@ -486,10 +488,11 @@ export async function seedInitialData() {
       compareAtPrice: "39.00",
       costPrice: "12.18",
       shippingCost: "0.00",
-      imageUrl: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&q=80",
+      imageUrl: "/products/lip-stain-1.jpg",
       images: [
-        "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&q=80",
-        "https://images.unsplash.com/photo-1631214540553-ff044a3ff1ea?w=800&q=80"
+        "/products/lip-stain-1.jpg",
+        "/products/lip-stain-2.jpg",
+        "/products/lip-stain-3.jpg"
       ],
       categoryId: beautyId,
       inventory: 300,
@@ -522,10 +525,11 @@ export async function seedInitialData() {
       compareAtPrice: "89.00",
       costPrice: "24.28",
       shippingCost: "0.00",
-      imageUrl: "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=800&q=80",
+      imageUrl: "/products/flame-diffuser-1.jpg",
       images: [
-        "https://images.unsplash.com/photo-1602928321679-560bb453f190?w=800&q=80",
-        "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80"
+        "/products/flame-diffuser-1.jpg",
+        "/products/flame-diffuser-2.jpg",
+        "/products/flame-diffuser-3.jpg"
       ],
       categoryId: homeWellnessId,
       inventory: 175,
@@ -558,10 +562,11 @@ export async function seedInitialData() {
       compareAtPrice: "35.00",
       costPrice: "8.79",
       shippingCost: "0.00",
-      imageUrl: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&q=80",
+      imageUrl: "/products/hair-growth-1.jpg",
       images: [
-        "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&q=80",
-        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80"
+        "/products/hair-growth-1.jpg",
+        "/products/hair-growth-2.jpg",
+        "/products/hair-growth-3.jpg"
       ],
       categoryId: beautyId,
       inventory: 250,

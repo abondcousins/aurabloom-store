@@ -30,3 +30,6 @@
 - [x] Soft luxury aesthetic with pink hues and feminine typography
 - [x] Mobile-first responsive design
 - [x] Sage green, dusty rose, and cream color palette accents
+
+## Image Updates
+- [x] Replace placeholder images with real CJ Dropshipping product photos
