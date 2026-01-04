@@ -14,6 +14,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Orders from "./pages/Orders";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
+import FAQ from "./pages/FAQ";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/orders" component={Orders} />
       <Route path="/admin" component={Admin} />
       <Route path="/about" component={About} />
+      <Route path="/faq" component={FAQ} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
