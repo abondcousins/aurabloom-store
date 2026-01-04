@@ -36,3 +36,8 @@
 
 ## Product Changes
 - [x] Remove Hair Growth Serum Spray from catalog
+
+## Branding
+- [x] Design minimalist AuraBloom logo with blooming flower icon
+- [x] Integrate logo into website header
+- [x] Add logo as favicon

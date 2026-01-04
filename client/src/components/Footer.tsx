@@ -9,9 +9,11 @@ export function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link href="/" className="inline-block">
-              <span className="text-xl font-semibold tracking-tight">
-                Aura<span className="text-primary">Bloom</span>
-              </span>
+              <img 
+                src="/logo.png" 
+                alt="AuraBloom" 
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
               Curated viral self-care products that deliver real results, real fast. 

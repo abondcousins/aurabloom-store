@@ -32,10 +32,12 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-            Aura<span className="text-primary">Bloom</span>
-          </span>
+        <Link href="/" className="flex items-center">
+          <img 
+            src="/logo.png" 
+            alt="AuraBloom" 
+            className="h-8 md:h-10 w-auto"
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -117,9 +119,11 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[350px]">
               <div className="flex flex-col gap-6 mt-6">
-                <div className="text-xl font-semibold">
-                  Aura<span className="text-primary">Bloom</span>
-                </div>
+                <img 
+                  src="/logo.png" 
+                  alt="AuraBloom" 
+                  className="h-8 w-auto"
+                />
                 <nav className="flex flex-col gap-4">
                   {navLinks.map((link) => (
                     <SheetClose asChild key={link.href}>
