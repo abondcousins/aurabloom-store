@@ -6,6 +6,8 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { notifyOwner } from "./_core/notification";
 import * as db from "./db";
+import { stripe, isStripeConfigured } from "./stripe/client";
+import { productToLineItem } from "./stripe/products";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -287,6 +289,125 @@ export const appRouter = router({
   seed: publicProcedure.mutation(async () => {
     await db.seedInitialData();
     return { success: true };
+  }),
+
+  // Stripe Payment
+  stripe: router({
+    isConfigured: publicProcedure.query(() => {
+      return { configured: isStripeConfigured() };
+    }),
+    
+    createCheckoutSession: publicProcedure
+      .input(z.object({
+        sessionId: z.string().optional(),
+        customerEmail: z.string().email().optional(),
+        customerName: z.string().optional(),
+        shippingAddress: z.string().optional(),
+        shippingCity: z.string().optional(),
+        shippingState: z.string().optional(),
+        shippingZip: z.string().optional(),
+        shippingCountry: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!stripe) {
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Stripe is not configured' 
+          });
+        }
+
+        const userId = ctx.user?.id;
+        const cartSessionId = input.sessionId;
+        
+        // Get cart items
+        const cartItems = await db.getCartWithProducts(userId, cartSessionId);
+        if (cartItems.length === 0) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Cart is empty' });
+        }
+
+        // Get base URL for images
+        const baseUrl = ctx.req.headers.origin || 'https://aurabloom.com';
+
+        // Create line items for Stripe
+        const lineItems = cartItems.map(item => 
+          productToLineItem(item.product, item.quantity, baseUrl)
+        );
+
+        // Store order details in metadata for webhook processing
+        const orderMetadata = {
+          user_id: userId?.toString() || '',
+          session_id: cartSessionId || '',
+          customer_email: input.customerEmail || ctx.user?.email || '',
+          customer_name: input.customerName || ctx.user?.name || '',
+          shipping_address: input.shippingAddress || '',
+          shipping_city: input.shippingCity || '',
+          shipping_state: input.shippingState || '',
+          shipping_zip: input.shippingZip || '',
+          shipping_country: input.shippingCountry || '',
+          cart_items: JSON.stringify(cartItems.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            name: item.product.name,
+            price: item.product.price,
+          }))),
+        };
+
+        // Create Stripe checkout session
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: lineItems,
+          mode: 'payment',
+          success_url: `${baseUrl}/order-confirmation/{CHECKOUT_SESSION_ID}`,
+          cancel_url: `${baseUrl}/cart`,
+          customer_email: input.customerEmail || ctx.user?.email || undefined,
+          client_reference_id: userId?.toString() || cartSessionId || undefined,
+          metadata: orderMetadata,
+          allow_promotion_codes: true,
+          shipping_address_collection: {
+            allowed_countries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'ES', 'IT', 'NL', 'BE'],
+          },
+        });
+
+        return { 
+          checkoutUrl: session.url,
+          sessionId: session.id,
+        };
+      }),
+
+    getSession: publicProcedure
+      .input(z.object({ sessionId: z.string() }))
+      .query(async ({ input }) => {
+        if (!stripe) {
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Stripe is not configured' 
+          });
+        }
+
+        try {
+          const session = await stripe.checkout.sessions.retrieve(input.sessionId, {
+            expand: ['line_items', 'payment_intent'],
+          });
+
+          return {
+            id: session.id,
+            status: session.status,
+            paymentStatus: session.payment_status,
+            customerEmail: session.customer_details?.email || session.customer_email,
+            customerName: session.customer_details?.name,
+            amountTotal: session.amount_total ? session.amount_total / 100 : 0,
+            currency: session.currency,
+            metadata: session.metadata,
+            shippingDetails: session.collected_information?.shipping_details || null,
+          };
+        } catch (error) {
+          console.error('[Stripe] Error retrieving session:', error);
+          throw new TRPCError({ 
+            code: 'NOT_FOUND', 
+            message: 'Checkout session not found' 
+          });
+        }
+      }),
   }),
 });
 

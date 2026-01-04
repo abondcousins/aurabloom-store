@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
-import { ChevronLeft, Loader2, Shield, Truck } from 'lucide-react';
+import { ChevronLeft, Loader2, Shield, Truck, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
@@ -19,27 +18,28 @@ export default function Checkout() {
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
-    customerPhone: '',
-    shippingAddress: '',
-    shippingCity: '',
-    shippingState: '',
-    shippingZip: '',
-    shippingCountry: 'United States',
-    notes: '',
   });
 
-  const createOrderMutation = trpc.orders.create.useMutation({
+  // Check if Stripe is configured
+  const { data: stripeConfig } = trpc.stripe.isConfigured.useQuery();
+
+  const createCheckoutMutation = trpc.stripe.createCheckoutSession.useMutation({
     onSuccess: (data) => {
-      toast.success('Order placed successfully!');
-      navigate(`/order-confirmation/${data.orderNumber}`);
+      if (data.checkoutUrl) {
+        toast.success('Redirecting to secure checkout...');
+        window.open(data.checkoutUrl, '_blank');
+      } else {
+        toast.error('Failed to create checkout session');
+        setIsSubmitting(false);
+      }
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to place order');
+      toast.error(error.message || 'Failed to create checkout session');
       setIsSubmitting(false);
     },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -54,11 +54,17 @@ export default function Checkout() {
       return;
     }
 
+    if (!stripeConfig?.configured) {
+      toast.error('Payment system is not configured. Please contact support.');
+      return;
+    }
+
     setIsSubmitting(true);
     
-    createOrderMutation.mutate({
-      ...formData,
+    createCheckoutMutation.mutate({
       sessionId,
+      customerEmail: formData.customerEmail || undefined,
+      customerName: formData.customerName || undefined,
     });
   };
 
@@ -99,133 +105,61 @@ export default function Checkout() {
                 {/* Contact Information */}
                 <div className="bg-card rounded-xl border border-border/50 p-6">
                   <h2 className="text-lg font-semibold text-foreground mb-4">Contact Information</h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Enter your email to receive order updates. Shipping address will be collected on the next page.
+                  </p>
                   
                   <div className="grid gap-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="customerName">Full Name *</Label>
+                        <Label htmlFor="customerName">Full Name (optional)</Label>
                         <Input
                           id="customerName"
                           name="customerName"
                           value={formData.customerName}
                           onChange={handleChange}
-                          required
                           placeholder="Jane Smith"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="customerEmail">Email *</Label>
+                        <Label htmlFor="customerEmail">Email (optional)</Label>
                         <Input
                           id="customerEmail"
                           name="customerEmail"
                           type="email"
                           value={formData.customerEmail}
                           onChange={handleChange}
-                          required
                           placeholder="jane@example.com"
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customerPhone">Phone (optional)</Label>
-                      <Input
-                        id="customerPhone"
-                        name="customerPhone"
-                        type="tel"
-                        value={formData.customerPhone}
-                        onChange={handleChange}
-                        placeholder="+1 (555) 000-0000"
-                      />
-                    </div>
                   </div>
                 </div>
 
-                {/* Shipping Address */}
-                <div className="bg-card rounded-xl border border-border/50 p-6">
-                  <h2 className="text-lg font-semibold text-foreground mb-4">Shipping Address</h2>
+                {/* Payment Info */}
+                <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-foreground">Secure Payment</h2>
+                      <p className="text-sm text-muted-foreground">Powered by Stripe</p>
+                    </div>
+                  </div>
                   
-                  <div className="grid gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="shippingAddress">Street Address *</Label>
-                      <Input
-                        id="shippingAddress"
-                        name="shippingAddress"
-                        value={formData.shippingAddress}
-                        onChange={handleChange}
-                        required
-                        placeholder="123 Main Street, Apt 4B"
-                      />
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="shippingCity">City *</Label>
-                        <Input
-                          id="shippingCity"
-                          name="shippingCity"
-                          value={formData.shippingCity}
-                          onChange={handleChange}
-                          required
-                          placeholder="New York"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="shippingState">State/Province</Label>
-                        <Input
-                          id="shippingState"
-                          name="shippingState"
-                          value={formData.shippingState}
-                          onChange={handleChange}
-                          placeholder="NY"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="shippingZip">ZIP/Postal Code *</Label>
-                        <Input
-                          id="shippingZip"
-                          name="shippingZip"
-                          value={formData.shippingZip}
-                          onChange={handleChange}
-                          required
-                          placeholder="10001"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="shippingCountry">Country *</Label>
-                        <select
-                          id="shippingCountry"
-                          name="shippingCountry"
-                          value={formData.shippingCountry}
-                          onChange={handleChange}
-                          required
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                          <option value="United States">United States</option>
-                          <option value="Canada">Canada</option>
-                          <option value="United Kingdom">United Kingdom</option>
-                          <option value="Australia">Australia</option>
-                          <option value="Germany">Germany</option>
-                          <option value="France">France</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                    </div>
+                  <p className="text-sm text-muted-foreground">
+                    You'll be redirected to Stripe's secure checkout page to complete your payment. 
+                    We accept all major credit cards, Apple Pay, and Google Pay.
+                  </p>
+                  
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="px-3 py-1 bg-background rounded-md text-xs font-medium border">Visa</div>
+                    <div className="px-3 py-1 bg-background rounded-md text-xs font-medium border">Mastercard</div>
+                    <div className="px-3 py-1 bg-background rounded-md text-xs font-medium border">Amex</div>
+                    <div className="px-3 py-1 bg-background rounded-md text-xs font-medium border">Apple Pay</div>
+                    <div className="px-3 py-1 bg-background rounded-md text-xs font-medium border">Google Pay</div>
                   </div>
-                </div>
-
-                {/* Order Notes */}
-                <div className="bg-card rounded-xl border border-border/50 p-6">
-                  <h2 className="text-lg font-semibold text-foreground mb-4">Order Notes (optional)</h2>
-                  <Textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    placeholder="Any special instructions for your order..."
-                    rows={3}
-                  />
                 </div>
               </div>
 
@@ -280,22 +214,31 @@ export default function Checkout() {
                     type="submit" 
                     className="w-full" 
                     size="lg"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !stripeConfig?.configured}
                   >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
+                        Redirecting...
                       </>
                     ) : (
-                      'Place Order'
+                      <>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Pay with Stripe
+                      </>
                     )}
                   </Button>
+
+                  {!stripeConfig?.configured && (
+                    <p className="mt-2 text-xs text-center text-amber-600">
+                      Payment system is being configured...
+                    </p>
+                  )}
 
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Shield className="h-4 w-4 text-primary" />
-                      Secure checkout
+                      256-bit SSL encrypted checkout
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Truck className="h-4 w-4 text-primary" />

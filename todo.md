@@ -45,3 +45,7 @@
 
 ## Pages
 - [x] Create About Us page with brand story
+
+## Payments
+- [x] Integrate Stripe payment gateway
+- [x] Enable real-time credit card transactions at checkout
