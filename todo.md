@@ -63,3 +63,4 @@
 - [x] Build order sync service to create CJ orders
 - [x] Update checkout flow to automatically sync orders to CJ
 - [x] Add tracking number sync from CJ to store orders
+- [x] Create admin page for CJ Dropshipping product mapping

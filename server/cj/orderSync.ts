@@ -193,9 +193,7 @@ export async function syncTrackingNumbers(): Promise<void> {
  * Update product mapping with CJ variant IDs
  */
 export function updateProductMapping(slug: string, vid: string, cjProductId: string): void {
-  if (PRODUCT_MAPPING[slug]) {
-    PRODUCT_MAPPING[slug] = { vid, cjProductId };
-  }
+  PRODUCT_MAPPING[slug] = { vid, cjProductId };
 }
 
 /**

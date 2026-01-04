@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import Shipping from "./pages/Shipping";
+import AdminCJMapping from "./pages/AdminCJMapping";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/order-confirmation/:orderNumber" component={OrderConfirmation} />
       <Route path="/orders" component={Orders} />
       <Route path="/admin" component={Admin} />
+      <Route path="/admin/cj-mapping" component={AdminCJMapping} />
       <Route path="/about" component={About} />
       <Route path="/faq" component={FAQ} />
       <Route path="/shipping" component={Shipping} />

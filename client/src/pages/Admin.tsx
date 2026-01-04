@@ -165,7 +165,7 @@ export default function Admin() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             <Button
               variant={activeTab === 'orders' ? 'default' : 'outline'}
               onClick={() => setActiveTab('orders')}
@@ -177,6 +177,15 @@ export default function Admin() {
               onClick={() => setActiveTab('inventory')}
             >
               Inventory
+            </Button>
+            <Button
+              variant="outline"
+              asChild
+            >
+              <Link href="/admin/cj-mapping">
+                <Package className="h-4 w-4 mr-2" />
+                CJ Product Mapping
+              </Link>
             </Button>
           </div>
 
