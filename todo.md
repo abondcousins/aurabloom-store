@@ -77,3 +77,6 @@
 - [x] Map all products to CJ Dropshipping variant IDs
 - [x] Create contact page with inquiry form
 - [x] Set up email notifications for order confirmations (owner notifications enabled)
+
+## Product Bundles
+- [x] Add Glow-Up Bundle (LED Mask + Collagen Mask) with discounted price

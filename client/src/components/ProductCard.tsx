@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { ShoppingBag, Star, Truck } from 'lucide-react';
+import { Gift, ShoppingBag, Star, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -62,6 +62,12 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
                 <Truck className="h-3 w-3" />
                 Fast Ship
+              </span>
+            )}
+            {product.slug === 'glow-up-bundle' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+                <Gift className="h-3 w-3" />
+                Bundle & Save
               </span>
             )}
           </div>

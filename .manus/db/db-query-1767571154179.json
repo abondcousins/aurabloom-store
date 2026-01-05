@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO reviews (productId, authorName, rating, title, content, isVerified) VALUES ((SELECT id FROM products WHERE slug = 'glow-up-bundle'), 'Olivia P.', 5, 'Best skincare investment!', 'The bundle is such a great deal. Both products work amazingly together - my skin has never looked better!', 1), ((SELECT id FROM products WHERE slug = 'glow-up-bundle'), 'Nicole W.', 5, 'Perfect gift', 'Bought this for my mom and she''s obsessed! The savings make it totally worth it.', 1);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3YUra4TMGWTz4H7.root --database kHXtmiufTKxix479Qs3Z3j --execute INSERT INTO reviews (productId, authorName, rating, title, content, isVerified) VALUES ((SELECT id FROM products WHERE slug = 'glow-up-bundle'), 'Olivia P.', 5, 'Best skincare investment!', 'The bundle is such a great deal. Both products work amazingly together - my skin has never looked better!', 1), ((SELECT id FROM products WHERE slug = 'glow-up-bundle'), 'Nicole W.', 5, 'Perfect gift', 'Bought this for my mom and she''s obsessed! The savings make it totally worth it.', 1);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 395
+}

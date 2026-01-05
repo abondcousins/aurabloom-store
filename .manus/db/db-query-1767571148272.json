@@ -1,0 +1,13 @@
+{
+  "query": "SELECT id FROM products WHERE slug = 'glow-up-bundle';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3YUra4TMGWTz4H7.root --database kHXtmiufTKxix479Qs3Z3j --execute SELECT id FROM products WHERE slug = 'glow-up-bundle';",
+  "rows": [
+    {
+      "id": "60001"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\n60001\n",
+  "stderr": "",
+  "execution_time_ms": 444
+}

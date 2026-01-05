@@ -504,6 +504,43 @@ export async function seedInitialData() {
       reviewCount: 156
     },
     {
+      name: "Glow-Up Bundle",
+      slug: "glow-up-bundle",
+      description: "Get the ultimate skin transformation with our best-selling duo! This exclusive bundle combines our viral LED Photon Therapy Mask with the TikTok-famous Collagen Overnight Wrapping Mask for a complete at-home spa experience. Save $40 when you bundle these two powerhouse products together.",
+      benefits: [
+        "Complete skincare routine in one bundle",
+        "LED therapy + overnight collagen treatment",
+        "Save $40 compared to buying separately",
+        "Professional spa results at home",
+        "Perfect gift for skincare lovers"
+      ],
+      specifications: {
+        "Includes": "LED Mask + Collagen Mask",
+        "LED Colors": "7 light modes",
+        "Mask Size": "75ml",
+        "Value": "$133 worth of products",
+        "Savings": "$40 off"
+      },
+      price: "93.00",
+      compareAtPrice: "133.00",
+      costPrice: "38.40",
+      shippingCost: "0.00",
+      imageUrl: "/products/glow-bundle-1.png",
+      images: [
+        "/products/glow-bundle-1.png",
+        "/products/glow-bundle-2.jpg",
+        "/products/glow-bundle-3.jpg"
+      ],
+      categoryId: skinCareId,
+      inventory: 100,
+      shippingDaysMin: 8,
+      shippingDaysMax: 20,
+      isFeatured: true,
+      isHero: false,
+      rating: "4.9",
+      reviewCount: 45
+    },
+    {
       name: "Flame Effect Aromatherapy Diffuser",
       slug: "flame-aromatherapy-diffuser",
       description: "Transform your space into a sanctuary with our mesmerizing flame-effect diffuser. This 2-in-1 humidifier and aromatherapy machine creates a stunning visual display while filling your room with calming essential oil mist. Bluetooth remote control for ultimate convenience.",
@@ -551,6 +588,7 @@ export async function seedInitialData() {
   const collagenMask = await getProductBySlug('collagen-overnight-mask');
   const lipStain = await getProductBySlug('peel-off-lip-stain');
   const diffuser = await getProductBySlug('flame-aromatherapy-diffuser');
+  const glowBundle = await getProductBySlug('glow-up-bundle');
   
   const reviewData: InsertReview[] = [
     // LED Photon Therapy Mask reviews
@@ -565,6 +603,9 @@ export async function seedInitialData() {
     // Flame Effect Aromatherapy Diffuser reviews
     { productId: diffuser?.id || 4, authorName: "Michelle T.", rating: 5, title: "Obsessed with the flame effect", content: "This is the aesthetic piece my bedroom was missing. So calming!", isVerified: true },
     { productId: diffuser?.id || 4, authorName: "Rachel B.", rating: 5, title: "Fast shipping!", content: "Arrived in just 8 days and works perfectly. The flame looks so real.", isVerified: true },
+    // Glow-Up Bundle reviews
+    { productId: glowBundle?.id || 5, authorName: "Olivia P.", rating: 5, title: "Best skincare investment!", content: "The bundle is such a great deal. Both products work amazingly together - my skin has never looked better!", isVerified: true },
+    { productId: glowBundle?.id || 5, authorName: "Nicole W.", rating: 5, title: "Perfect gift", content: "Bought this for my mom and she's obsessed! The savings make it totally worth it.", isVerified: true },
   ];
 
   for (const review of reviewData) {
